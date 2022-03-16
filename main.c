@@ -31,14 +31,14 @@
 
 typedef union
 {
-	struct
-	{
-		uint8_t w;
-		uint8_t b;
-		uint8_t r;
-		uint8_t g;
-	} color;
-	uint32_t data;
+  struct
+  {
+    uint8_t w;
+    uint8_t b;
+    uint8_t r;
+    uint8_t g;
+  } color;
+  uint32_t data;
 } PixelRGBW_t;
 
 /* USER CODE END PTD */
@@ -102,7 +102,7 @@ uint32_t dist2color(uint32_t dist, uint32_t maxDist, uint8_t power);
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
-	HAL_TIM_PWM_Stop_DMA(htim, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Stop_DMA(htim, TIM_CHANNEL_3);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -122,126 +122,126 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	PixelRGBW_t pixelMatrix[8][8] = {0};
-	uint32_t pixelVal;
-	uint32_t dmaBuffer[DMA_BUFF_SIZE] = {0};
-	uint32_t *pBuff;
+  PixelRGBW_t pixelMatrix[8][8] = {0};
+  uint32_t pixelVal;
+  uint32_t dmaBuffer[DMA_BUFF_SIZE] = {0};
+  uint32_t *pBuff;
 
-	VL53L5CX_Configuration Dev;
-	VL53L5CX_ResultsData  Results;
-	uint8_t isAlive;
-	int status;
+  VL53L5CX_Configuration Dev;
+  VL53L5CX_ResultsData  Results;
+  uint8_t isAlive;
+  int status;
 
-	int i, j, k;
+  int i, j, k;
 
-	/* USER CODE END 1 */
+  /* USER CODE END 1 */
 
-	/* MCU Configuration--------------------------------------------------------*/
+  /* MCU Configuration--------------------------------------------------------*/
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-	/* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
+  /* USER CODE END Init */
 
-	/* Configure the system clock */
-	SystemClock_Config();
+  /* Configure the system clock */
+  SystemClock_Config();
 
-	/* USER CODE BEGIN SysInit */
+  /* USER CODE BEGIN SysInit */
 
-	/* USER CODE END SysInit */
+  /* USER CODE END SysInit */
 
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_USART2_UART_Init();
-	MX_DMA_Init();
-	MX_TIM2_Init();
-	MX_I2C1_Init();
-	/* USER CODE BEGIN 2 */
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART2_UART_Init();
+  MX_DMA_Init();
+  MX_TIM2_Init();
+  MX_I2C1_Init();
+  /* USER CODE BEGIN 2 */
 
-	Dev.platform.address = VL53L5CX_DEFAULT_I2C_ADDRESS;
+  Dev.platform.address = VL53L5CX_DEFAULT_I2C_ADDRESS;
 
-	// Reset ToF Sensor (Section 4.2 in UM2884)
-	HAL_GPIO_WritePin(I2C_RST_C_GPIO_Port, I2C_RST_C_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(PWR_EN_C_GPIO_Port, PWR_EN_C_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LPn_C_GPIO_Port, LPn_C_Pin, GPIO_PIN_RESET);
-	HAL_Delay(10);
-	HAL_GPIO_WritePin(PWR_EN_C_GPIO_Port, PWR_EN_C_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LPn_C_GPIO_Port, LPn_C_Pin, GPIO_PIN_SET);
-	status = vl53l5cx_is_alive(&Dev, &isAlive);
-	if(!isAlive)
-	{
-	printf("VL53L5CXV0 not detected at requested address (0x%x)\n", Dev.platform.address);
-	return 255;
-	}
+  // Reset ToF Sensor (Section 4.2 in UM2884)
+  HAL_GPIO_WritePin(I2C_RST_C_GPIO_Port, I2C_RST_C_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(PWR_EN_C_GPIO_Port, PWR_EN_C_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LPn_C_GPIO_Port, LPn_C_Pin, GPIO_PIN_RESET);
+  HAL_Delay(10);
+  HAL_GPIO_WritePin(PWR_EN_C_GPIO_Port, PWR_EN_C_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LPn_C_GPIO_Port, LPn_C_Pin, GPIO_PIN_SET);
+  status = vl53l5cx_is_alive(&Dev, &isAlive);
+  if(!isAlive)
+  {
+    printf("VL53L5CXV0 not detected at requested address (0x%x)\n", Dev.platform.address);
+    return 255;
+  }
 
-	// Initialize and Configure ToF Sensor
-	printf("Sensor initializing, please wait few seconds\n");
-	status = vl53l5cx_init(&Dev);
-	status = vl53l5cx_set_resolution(&Dev, VL53L5CX_RESOLUTION_8X8); // must be called before updating ranging frequency
-	status = vl53l5cx_set_ranging_frequency_hz(&Dev, 15);        // Set 2Hz ranging frequency
-	status = vl53l5cx_set_ranging_mode(&Dev, VL53L5CX_RANGING_MODE_CONTINUOUS);  // Set mode continuous
+  // Initialize and Configure ToF Sensor
+  printf("Sensor initializing, please wait few seconds\n");
+  status = vl53l5cx_init(&Dev);
+  status = vl53l5cx_set_resolution(&Dev, VL53L5CX_RESOLUTION_8X8); // must be called before updating ranging frequency
+  status = vl53l5cx_set_ranging_frequency_hz(&Dev, 15);        // Set 2Hz ranging frequency
+  status = vl53l5cx_set_ranging_mode(&Dev, VL53L5CX_RANGING_MODE_CONTINUOUS);  // Set mode continuous
 
-	printf("Ranging starts\n");
-	status = vl53l5cx_start_ranging(&Dev);
+  printf("Ranging starts\n");
+  status = vl53l5cx_start_ranging(&Dev);
 
-	/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
-	/* Infinite loop */
-	/* USER CODE BEGIN WHILE */
-	vl53l5cx_int = 0;
-	while (1)
-	{
-		/* USER CODE END WHILE */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  vl53l5cx_int = 0;
+  while (1)
+  {
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
-		if(vl53l5cx_int > 0)
-		{
-			vl53l5cx_int = 0;
-			status = vl53l5cx_get_ranging_data(&Dev, &Results);
+    /* USER CODE BEGIN 3 */
+    if(vl53l5cx_int > 0)
+    {
+      vl53l5cx_int = 0;
+      status = vl53l5cx_get_ranging_data(&Dev, &Results);
 
-			for (i = 0; i < 8; i++)
-			{
-				for (j = 0; j < 8; j++)
-				{
-					if (Results.nb_target_detected[(i<<3)+j] > 0)
-					{
-						pixelMatrix[i][j].data = dist2color(Results.distance_mm[(i<<3)+j], 1000, 50);
-					}
-					else
-					{
-						pixelMatrix[i][j].data = 0;
-					}
-				}
-			}
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 8; j++)
+        {
+          if (Results.nb_target_detected[(i<<3)+j] > 0)
+          {
+            pixelMatrix[i][j].data = dist2color(Results.distance_mm[(i<<3)+j], 1000, 50);
+          }
+          else
+          {
+            pixelMatrix[i][j].data = 0;
+          }
+        }
+      }
 
-			pBuff = dmaBuffer;
-			for (j = 7; j >= 0; j--)
-			{
-				for (i = 7; i >= 0; i--)
-				{
-					pixelVal = pixelMatrix[i][j].data;
-					for (k = 31; k >= 0; k--)
-					{
-						if ((pixelVal >> k) & 0x01)
-						{
-							*pBuff = NEOPIXEL_ONE;
-						}
-						else
-						{
-							*pBuff = NEOPIXEL_ZERO;
-						}
-						pBuff++;
-					}
-				}
-			}
-			dmaBuffer[DMA_BUFF_SIZE - 1] = 0; // last element must be 0!
+      pBuff = dmaBuffer;
+      for (j = 7; j >= 0; j--)
+      {
+        for (i = 7; i >= 0; i--)
+        {
+          pixelVal = pixelMatrix[i][j].data;
+          for (k = 31; k >= 0; k--)
+          {
+            if ((pixelVal >> k) & 0x01)
+            {
+              *pBuff = NEOPIXEL_ONE;
+            }
+            else
+            {
+              *pBuff = NEOPIXEL_ZERO;
+            }
+            pBuff++;
+          }
+        }
+      }
+      dmaBuffer[DMA_BUFF_SIZE - 1] = 0; // last element must be 0!
 
-			HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, (uint32_t *)dmaBuffer, DMA_BUFF_SIZE);
-		}
-	}
-	/* USER CODE END 3 */
+      HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, (uint32_t *)dmaBuffer, DMA_BUFF_SIZE);
+    }
+  }
+  /* USER CODE END 3 */
 }
 
 /**
