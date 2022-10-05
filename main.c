@@ -180,7 +180,7 @@ int main(void)
   printf("Sensor initializing, please wait few seconds\n");
   status = vl53l5cx_init(&Dev);
   status = vl53l5cx_set_resolution(&Dev, VL53L5CX_RESOLUTION_8X8); // must be called before updating ranging frequency
-  status = vl53l5cx_set_ranging_frequency_hz(&Dev, 15);        // Set 2Hz ranging frequency
+  status = vl53l5cx_set_ranging_frequency_hz(&Dev, 15);        // Set 15Hz ranging frequency
   status = vl53l5cx_set_ranging_mode(&Dev, VL53L5CX_RANGING_MODE_CONTINUOUS);  // Set mode continuous
 
   printf("Ranging starts\n");
